@@ -37,6 +37,19 @@
   @media (max-width:600px){.features-bar{grid-template-columns:1fr;}}
   .f-item{background:var(--card); border:1px solid var(--line); padding:12px 14px; border-radius:10px; font-size:12.5px; display:flex; align-items:center; gap:8px; font-weight:600; color:var(--brand-green);}
 
+  /* قسم تتبع الطلبات */
+  .track-card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:20px 24px; margin-bottom:28px; box-shadow:0 4px 12px rgba(0,0,0,0.02);}
+  .track-title{font-family:'Reem Kufi', sans-serif; font-size:17px; color:var(--brand-green); margin-bottom:12px; font-weight:700; display:flex; align-items:center; gap:8px;}
+  .track-title svg{width:20px; height:20px; color:var(--brand-green);}
+  .track-form{display:flex; gap:10px;}
+  @media (max-width:500px){.track-form{flex-direction:column;}}
+  .track-form input{flex:1; padding:11px 14px; border:1px solid var(--line); border-radius:8px; font-family:'IBM Plex Mono', monospace; font-size:14px; background:#FAFDFB; color:var(--ink);}
+  .track-form input:focus{outline:none; border-color:var(--brand-green); background:#FFF;}
+  .track-form button{padding:11px 24px; background:var(--brand-green); color:#fff; border:none; border-radius:8px; font-family:inherit; font-weight:600; cursor:pointer; transition:0.2s; white-space:nowrap;}
+  .track-form button:hover{background:#08442B;}
+  .track-result{margin-top:16px; padding:16px; background:var(--teal-bg); border-radius:10px; border:1px solid var(--line);}
+  .status-badge{display:inline-block; padding:4px 12px; border-radius:20px; font-size:12.5px; font-weight:600; color:#fff;}
+
   .layout{display:grid; grid-template-columns:1fr 340px; gap:24px; align-items:start;}
   @media (max-width:760px){.layout{grid-template-columns:1fr;}}
   form{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:32px; box-shadow:0 4px 12px rgba(0,0,0,0.02);}
@@ -182,6 +195,19 @@
     <div class="f-item">✔️ اعتماد رسمي 100% للمحاكم والسفارات</div>
     <div class="f-item">🔒 سرية تامة وأمان مطلق لمستنداتك</div>
     <div class="f-item">⚡ تسليم سريع ودقة متناهية</div>
+  </div>
+
+  <!-- قسم تتبع الطلبات للعميل -->
+  <div class="track-card">
+    <div class="track-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      تتبع حالة طلبك
+    </div>
+    <div class="track-form">
+      <input type="text" id="trackInput" placeholder="أدخل رقم الطلب (مثال: ORD-2026-12345)">
+      <button type="button" id="trackBtn">استعلام عن الطلب</button>
+    </div>
+    <div class="track-result" id="trackResult" style="display:none;"></div>
   </div>
 
   <div class="layout" id="formView">
@@ -414,6 +440,59 @@
     navigator.clipboard.writeText(document.getElementById('finalCode').textContent);
   });
 
+  /* برمجية تتبع الطلب للعملاء */
+  const trackInput = document.getElementById('trackInput');
+  const trackBtn = document.getElementById('trackBtn');
+  const trackResult = document.getElementById('trackResult');
+
+  function performTrack(){
+    const query = trackInput.value.trim().toUpperCase();
+    if(!query){
+      trackResult.style.display = 'block';
+      trackResult.style.background = '#FEF2F2';
+      trackResult.style.borderColor = '#FCA5A5';
+      trackResult.innerHTML = '<div style="color:#DC2626; font-size:13px; font-weight:500;">⚠️ يرجى إدخال رقم الطلب للبحث.</div>';
+      return;
+    }
+
+    const orders = getOrders();
+    const found = orders.find(o => o.id.toUpperCase() === query);
+
+    trackResult.style.display = 'block';
+    if(found){
+      trackResult.style.background = 'var(--teal-bg)';
+      trackResult.style.borderColor = 'var(--line)';
+
+      let badgeBg = '#0B5838';
+      if(found.status.includes('جديد')) badgeBg = '#D97706';
+      else if(found.status.includes('قيد') || found.status.includes('مستلم')) badgeBg = '#2563EB';
+      else if(found.status.includes('جاهز')) badgeBg = '#059669';
+      else if(found.status.includes('تم التسليم')) badgeBg = '#4B5563';
+
+      const orderDate = new Date(found.date).toLocaleDateString('ar-LY', { year:'numeric', month:'short', day:'numeric' });
+
+      trackResult.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+          <span style="font-family:'IBM Plex Mono', monospace; font-weight:700; color:var(--brand-green); font-size:16px;">${found.id}</span>
+          <span class="status-badge" style="background:${badgeBg};">${found.status}</span>
+        </div>
+        <div style="font-size:13.5px; line-height:1.8; color:var(--ink);">
+          <div><b>العميل:</b> ${found.name || '—'}</div>
+          <div><b>نوع المستند:</b> ${found.docType} (${found.pages || 1} صفحات)</div>
+          <div><b>مسار الترجمة:</b> ${found.sourceLang} ← ${found.targetLang}</div>
+          <div><b>تاريخ الطلب:</b> ${orderDate}</div>
+        </div>
+      `;
+    } else {
+      trackResult.style.background = '#FEF2F2';
+      trackResult.style.borderColor = '#FCA5A5';
+      trackResult.innerHTML = '<div style="color:#DC2626; font-size:13px; font-weight:500;">❌ لم يتم العثور على طلب بهذا الرقم. يرجى التأكد من كتابة الرقم بشكل صحيح (مثال: ORD-2026-12345).</div>';
+    }
+  }
+
+  trackBtn.addEventListener('click', performTrack);
+  trackInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') performTrack(); });
+
   document.getElementById('goAdmin').addEventListener('click', () => {
     document.getElementById('clientView').style.display = 'none';
     document.getElementById('adminView').style.display = 'block';
@@ -517,7 +596,8 @@
       saveOrders([]);
       renderDashboard();
     }
-  });<script>
+  });
+
   // تعطيل القائمة اليمنى
   document.addEventListener('contextmenu', event => event.preventDefault());
 
@@ -529,7 +609,6 @@
     if(e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false;
     if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // View Source
   }
-</script>
 </script>
 </body>
 </html>
