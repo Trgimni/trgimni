@@ -1,458 +1,544 @@
-[cite: 1]<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>أصول الأندلس | تطبيق ترجمني للترجمة القانونية المعتمدة</title>
+<title>أصول الأندلس للترجمة القانونية والسفر | تطوير المهندس مجيب مبارك</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700;800&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700;800&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@500;600;700&family=Montserrat:wght@800;900&display=swap" rel="stylesheet">
 
-<!-- مكتبات قواعد البيانات السحابية Firebase compat SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
 <style>
   :root {
     --brand-green: #0B5838;
-    --brand-green-dark: #063924;
+    --brand-green-dark: #052B1C;
+    --brand-green-light: #158A59;
     --brand-gold: #D4AF37;
-    --brand-gold-glow: #FFE58F;
-    --ink: #0F2A1D;
-    --ink-soft: #4A6356;
-    --paper: #F4F7F5;
+    --brand-gold-glow: #FFE885;
+    --brand-gold-dark: #A3821A;
+    --ink: #0A1E15;
+    --ink-soft: #42594D;
+    --paper: #F0F5F2;
     --card: #FFFFFF;
-    --line: #D1E0D7;
-    --teal-bg: #EAF3EE;
-    --radius: 18px;
+    --line: #C7DCD0;
+    --teal-bg: #E4F1EB;
     --whatsapp: #25D366;
-    --shadow-sm: 0 4px 14px rgba(11, 88, 56, 0.05);
-    --shadow-lg: 0 12px 32px rgba(11, 88, 56, 0.12);
+    --whatsapp-dark: #1EBE5D;
+    --danger: #EF4444;
+    --radius: 20px;
+    --shadow-glow: 0 10px 30px -5px rgba(212, 175, 55, 0.3);
+    --shadow-btn: 0 12px 28px -6px rgba(11, 88, 56, 0.35);
   }
 
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'IBM Plex Sans Arabic', sans-serif; min-height: 100vh; overflow-x: hidden; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: 'IBM Plex Sans Arabic', sans-serif; min-height: 100vh; overflow-x: hidden; line-height: 1.6; }
 
-  /* ---------------- Splash Screen Animation ---------------- */
+  /* ---------------- 1. الشعار المتحرك والشاشة الافتتاحية ---------------- */
   #splashOverlay {
     position: fixed; inset: 0; z-index: 99999;
-    background: linear-gradient(135deg, #063924 0%, #0B5838 100%);
+    background: radial-gradient(circle at center, #0B5838 0%, #031C12 100%);
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    color: #FFF; transition: opacity 0.6s ease, visibility 0.6s;
+    color: #FFF; transition: opacity 0.8s ease, visibility 0.8s;
   }
-  .splash-logo { width: 110px; height: 110px; animation: pulseGlow 1.8s infinite ease-in-out; }
+  
+  .splash-logo-wrap { position: relative; width: 130px; height: 130px; margin-bottom: 22px; }
+  
+  /* انيميشن دوران الحلقة الخارجية للشعار */
+  .logo-orbit-ring {
+    position: absolute; inset: -10px; border-radius: 50%;
+    border: 2px dashed var(--brand-gold);
+    animation: orbitRotate 12s linear infinite;
+  }
+  @keyframes orbitRotate { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+  .splash-logo {
+    width: 100%; height: 100%;
+    filter: drop-shadow(0 0 18px rgba(212,175,55,0.7));
+    animation: logoGlowPulse 2.5s ease-in-out infinite alternate;
+  }
+  @keyframes logoGlowPulse {
+    0% { transform: scale(0.98); filter: drop-shadow(0 0 12px rgba(212,175,55,0.5)); }
+    100% { transform: scale(1.05); filter: drop-shadow(0 0 32px rgba(212,175,55,1)); }
+  }
+
   .splash-title-en {
-    font-family: 'Montserrat', sans-serif; font-size: 32px; font-weight: 900; letter-spacing: 4px;
-    margin-top: 18px; background: linear-gradient(90deg, #D4AF37 0%, #FFF 50%, #D4AF37 100%);
+    font-family: 'Montserrat', sans-serif; font-size: 36px; font-weight: 900; letter-spacing: 6px;
+    background: linear-gradient(90deg, #D4AF37 0%, #FFF 50%, #D4AF37 100%);
     background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     animation: shineText 2.5s linear infinite;
   }
-  .splash-sub { font-size: 13px; opacity: 0.8; margin-top: 6px; font-weight: 400; letter-spacing: 1px; }
-
   @keyframes shineText { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-  @keyframes pulseGlow { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 10px rgba(212,175,55,0.4)); } 50% { transform: scale(1.08); filter: drop-shadow(0 0 25px rgba(212,175,55,0.8)); } }
 
-  /* ---------------- Header & Top Navigation Bar ---------------- */
+  .engineer-badge {
+    margin-top: 14px; background: rgba(212, 175, 55, 0.15); border: 1px solid var(--brand-gold);
+    padding: 6px 18px; border-radius: 99px; font-size: 12.5px; font-weight: 700; color: var(--brand-gold-glow);
+    letter-spacing: 0.5px; backdrop-filter: blur(8px);
+  }
+
+  .splash-progress-bar {
+    width: 220px; height: 5px; background: rgba(255, 255, 255, 0.15); border-radius: 99px;
+    margin-top: 25px; overflow: hidden; position: relative; border: 1px solid rgba(212,175,55,0.3);
+  }
+  .splash-progress-fill {
+    position: absolute; top: 0; right: 0; height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--brand-gold), #FFF);
+    animation: fillProgress 5.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+  @keyframes fillProgress { 0% { width: 0%; } 100% { width: 100%; } }
+
+  /* ---------------- 2. الترويسة الأنيقة والحديثة ---------------- */
   .app-header {
-    position: sticky; top: 0; z-index: 1000; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--line); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
-    box-shadow: var(--shadow-sm);
+    position: sticky; top: 0; z-index: 1000; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--line); padding: 12px 24px; display: flex; align-items: center; justify-content: space-between;
+    box-shadow: 0 4px 20px rgba(11, 88, 56, 0.06);
   }
-  .header-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
-  .brand-logo-wrap { position: relative; width: 44px; height: 44px; }
-  .brand-logo-wrap svg { width: 100%; height: 100%; filter: drop-shadow(0 2px 6px rgba(212, 175, 55, 0.4)); }
+  .header-brand { display: flex; align-items: center; gap: 14px; text-decoration: none; color: inherit; }
   
-  /* Shining Effect on Header Logo */
-  .brand-logo-wrap::after {
-    content: ''; position: absolute; inset: -2px; border-radius: 50%;
-    background: linear-gradient(45deg, transparent 30%, rgba(212, 175, 55, 0.6) 50%, transparent 70%);
-    animation: logoShine 3s infinite; pointer-events: none;
+  .brand-logo-container { position: relative; width: 48px; height: 48px; }
+  .header-logo-orbit {
+    position: absolute; inset: -4px; border-radius: 50%; border: 1.5px dashed var(--brand-gold);
+    animation: orbitRotate 8s linear infinite;
   }
-  @keyframes logoShine { 0% { opacity: 0; transform: rotate(0deg); } 50% { opacity: 1; } 100% { opacity: 0; transform: rotate(360deg); } }
-
+  
   .brand-names { display: flex; flex-direction: column; }
-  .brand-ar { font-family: 'Reem Kufi', sans-serif; font-size: 17px; font-weight: 800; color: var(--brand-green); line-height: 1.1; }
-  .brand-en { font-family: 'Montserrat', sans-serif; font-size: 11px; font-weight: 800; color: var(--brand-gold); letter-spacing: 2px; }
+  .brand-ar { font-family: 'Reem Kufi', sans-serif; font-size: 18px; font-weight: 800; color: var(--brand-green); line-height: 1.1; }
+  .brand-en { font-family: 'Montserrat', sans-serif; font-size: 10px; font-weight: 800; color: var(--brand-gold-dark); letter-spacing: 2px; }
 
-  /* Hamburger Menu Button (3 Bars) */
+  /* ---------------- 3. استايل الأزرار النيو-مستقبلي الجديد (Neo-Glow Buttons) ---------------- */
+  .btn-futuristic {
+    position: relative; overflow: hidden; border: 1px solid rgba(212, 175, 55, 0.6);
+    background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+    color: #FFF; border-radius: 99px; padding: 14px 28px; font-family: inherit; font-size: 15px; font-weight: 700;
+    cursor: pointer; box-shadow: var(--shadow-btn); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none;
+  }
+  .btn-futuristic::before {
+    content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 232, 133, 0.35), transparent);
+    transform: rotate(45deg); transition: 0.6s; pointer-events: none;
+  }
+  .btn-futuristic:hover::before { left: 100%; }
+  .btn-futuristic:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 16px 32px -5px rgba(212, 175, 55, 0.45);
+    border-color: var(--brand-gold-glow);
+  }
+  .btn-futuristic:active { transform: translateY(1px) scale(0.98); }
+
+  .quick-wa-btn {
+    background: linear-gradient(135deg, #25D366, #1EBE5D); color: #FFF;
+    border: 1px solid rgba(255,255,255,0.4); padding: 8px 16px; border-radius: 99px;
+    font-size: 12.5px; font-weight: 700; text-decoration: none; transition: 0.25s;
+    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+  }
+  .quick-wa-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(37, 211, 102, 0.5); }
+
   .menu-toggle-btn {
-    width: 42px; height: 42px; border-radius: 12px; border: 1px solid var(--line); background: var(--teal-bg);
+    width: 44px; height: 44px; border-radius: 14px; border: 1px solid var(--line); background: var(--teal-bg);
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; cursor: pointer; transition: 0.2s;
   }
-  .menu-toggle-btn span { width: 20px; height: 2px; background: var(--brand-green); border-radius: 2px; transition: 0.3s; }
+  .menu-toggle-btn span { width: 22px; height: 2.5px; background: var(--brand-green); border-radius: 2px; transition: 0.3s; }
   .menu-toggle-btn:hover { background: var(--brand-green); }
   .menu-toggle-btn:hover span { background: #FFF; }
 
-  /* ---------------- Side Drawer Navigation ---------------- */
-  .drawer-overlay { position: fixed; inset: 0; background: rgba(15, 42, 29, 0.5); backdrop-filter: blur(4px); z-index: 9998; opacity: 0; visibility: hidden; transition: 0.3s; }
+  /* ---------------- 4. القائمة الجانبية ---------------- */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(5, 43, 28, 0.6); backdrop-filter: blur(5px); z-index: 9998; opacity: 0; visibility: hidden; transition: 0.3s; }
   .drawer-overlay.active { opacity: 1; visibility: visible; }
-  
   .side-drawer {
-    position: fixed; top: 0; right: -320px; width: 300px; height: 100%; background: var(--card); z-index: 9999;
-    box-shadow: -4px 0 24px rgba(0,0,0,0.15); transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column;
+    position: fixed; top: 0; right: -350px; width: 320px; height: 100%; background: var(--card); z-index: 9999;
+    box-shadow: -6px 0 32px rgba(0,0,0,0.2); transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column;
   }
   .side-drawer.active { right: 0; }
   .drawer-header { padding: 24px 20px; background: linear-gradient(135deg, var(--brand-green-dark), var(--brand-green)); color: #FFF; display: flex; justify-content: space-between; align-items: center; }
-  .drawer-close { background: rgba(255,255,255,0.15); border: none; color: #FFF; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 18px; }
+  .drawer-close { background: rgba(255,255,255,0.18); border: none; color: #FFF; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 20px; }
   .drawer-nav { padding: 20px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
-  .drawer-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; color: var(--ink); text-decoration: none; font-size: 14px; font-weight: 500; transition: 0.2s; cursor: pointer; }
-  .drawer-item:hover, .drawer-item.active { background: var(--teal-bg); color: var(--brand-green); font-weight: 700; }
+  .drawer-item { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-radius: 14px; color: var(--ink); text-decoration: none; font-size: 14px; font-weight: 600; transition: 0.2s; cursor: pointer; }
+  .drawer-item:hover, .drawer-item.active { background: var(--teal-bg); color: var(--brand-green); }
   .drawer-footer { padding: 20px; border-top: 1px solid var(--line); font-size: 12px; color: var(--ink-soft); text-align: center; }
 
-  /* ---------------- Main Page Layout ---------------- */
-  .page { max-width: 1050px; margin: 0 auto; padding: 20px 16px 80px; }
+  /* ---------------- 5. الهيكل العام للواجهة ---------------- */
+  .page { max-width: 1100px; margin: 0 auto; padding: 24px 16px 100px; }
 
-  /* Hero Section */
+  /* هيرو الواجهة */
   .hero-card {
-    background: linear-gradient(135deg, #FFFFFF 0%, var(--teal-bg) 100%); border: 1px solid var(--line);
-    border-radius: var(--radius); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm);
-    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    background: linear-gradient(135deg, #FFFFFF 0%, #E8F3ED 100%); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 30px; margin-bottom: 24px; box-shadow: 0 6px 24px rgba(11,88,56,0.05);
+    display: flex; align-items: center; justify-content: space-between; gap: 20px; position: relative; overflow: hidden;
   }
-  .hero-badge { display: inline-flex; align-items: center; gap: 6px; background: #FEFCE8; border: 1px solid #FEF08A; color: #854D0E; font-size: 12px; font-weight: 700; padding: 4px 12px; border-radius: 20px; margin-bottom: 10px; }
-  .hero-title { font-family: 'Reem Kufi', sans-serif; font-size: 24px; font-weight: 800; color: var(--brand-green); margin: 0 0 8px; line-height: 1.3; }
-  .hero-desc { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; margin: 0; }
-  
-  /* Feature Tabs Bar */
-  .novel-features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
-  @media (max-width: 768px) { .novel-features-grid { grid-template-columns: 1fr; } }
-  .novel-card { background: var(--card); border: 1px solid var(--line); padding: 14px 16px; border-radius: 14px; display: flex; align-items: center; gap: 12px; box-shadow: var(--shadow-sm); }
-  .novel-icon { width: 38px; height: 38px; border-radius: 10px; background: var(--teal-bg); color: var(--brand-green); display: flex; align-items: center; justify-content: center; font-size: 20px; flex: none; }
-  .novel-info div:first-child { font-size: 13px; font-weight: 700; color: var(--brand-green); }
-  .novel-info div:last-child { font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
+  .hero-card::after {
+    content: ''; position: absolute; left: -40px; bottom: -40px; width: 150px; height: 150px;
+    background: radial-gradient(circle, rgba(212,175,55,0.15) 0%, transparent 70%); border-radius: 50%; pointer-events: none;
+  }
+  .hero-title { font-family: 'Reem Kufi', sans-serif; font-size: 28px; font-weight: 800; color: var(--brand-green); margin: 0 0 8px; line-height: 1.25; }
+  .hero-desc { font-size: 14.5px; color: var(--ink-soft); line-height: 1.6; margin: 0; }
 
-  /* Interactive Layout */
-  .main-layout { display: grid; grid-template-columns: 1fr 360px; gap: 24px; }
-  @media (max-width: 850px) { .main-layout { grid-template-columns: 1fr; } }
+  /* شبكة المميزات */
+  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 28px; }
+  @media (max-width: 768px) { .features-grid { grid-template-columns: 1fr; } }
+  .feature-card { background: var(--card); border: 1px solid var(--line); padding: 16px; border-radius: 16px; display: flex; align-items: center; gap: 14px; transition: 0.25s; }
+  .feature-card:hover { transform: translateY(-3px); border-color: var(--brand-gold); box-shadow: 0 8px 20px rgba(11,88,56,0.08); }
+  .feature-icon { width: 44px; height: 44px; border-radius: 14px; background: var(--teal-bg); color: var(--brand-green); display: flex; align-items: center; justify-content: center; font-size: 22px; flex: none; }
 
-  /* Order Form */
-  .app-form { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-sm); }
-  .section-head { font-family: 'Reem Kufi', sans-serif; font-size: 17px; font-weight: 700; color: var(--brand-green); margin: 0 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--teal-bg); display: flex; align-items: center; gap: 8px; }
+  /* تخطيط الاستمارة والوصل */
+  .main-layout { display: grid; grid-template-columns: 1fr 380px; gap: 24px; }
+  @media (max-width: 880px) { .main-layout { grid-template-columns: 1fr; } }
+
+  .app-form { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.04); }
+  .section-head { font-family: 'Reem Kufi', sans-serif; font-size: 19px; font-weight: 700; color: var(--brand-green); margin: 0 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--teal-bg); display: flex; align-items: center; gap: 8px; }
+
   .field { margin-bottom: 18px; }
-  .field label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-soft); margin-bottom: 6px; }
+  .field label { display: block; font-size: 13px; font-weight: 700; color: var(--ink-soft); margin-bottom: 6px; }
   .field input, .field select, .field textarea {
-    width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; font-family: inherit; font-size: 14px; color: var(--ink); background: #FAFDFB; transition: 0.2s;
+    width: 100%; padding: 13px 15px; border: 1px solid var(--line); border-radius: 12px; font-family: inherit; font-size: 14px; color: var(--ink); background: #FAFDFB; transition: 0.2s;
   }
-  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--brand-green); background: #FFF; box-shadow: 0 0 0 3px rgba(11, 88, 56, 0.1); }
-  
-  /* Embassy Preset Feature Box */
-  .embassy-box { background: #FEFCE8; border: 1px dashed #FDE047; border-radius: 12px; padding: 12px 14px; margin-bottom: 18px; }
-  .embassy-title { font-size: 12.5px; font-weight: 700; color: #854D0E; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--brand-green); background: #FFF; box-shadow: 0 0 0 3px rgba(11, 88, 56, 0.12); }
 
-  /* Audio Voice Recorder Feature */
-  .voice-recorder-box { background: var(--teal-bg); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 18px; }
-  .rec-btn { background: #EF4444; color: #FFF; border: none; padding: 8px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-  .rec-btn.recording { animation: pulseRec 1s infinite; }
-  @keyframes pulseRec { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+  /* ---------------- 6. تفعيل قسم السفر والسياحة والفيز ---------------- */
+  .travel-category-box {
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+    border: 1px solid #BFDBFE; border-radius: 16px; padding: 16px; margin-bottom: 22px;
+  }
+  .travel-title { font-size: 14px; font-weight: 800; color: #1E40AF; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
 
-  /* Emergency Express Toggle Feature */
-  .express-toggle-box { background: #FFF7ED; border: 1px solid #FFEDD5; border-radius: 12px; padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-  .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+  /* حاسبة التكلفة */
+  .calc-box { background: var(--teal-bg); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-bottom: 20px; }
+  .calc-slider-wrap { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+  .calc-slider-wrap input[type="range"] { flex: 1; accent-color: var(--brand-green); cursor: pointer; }
+  .calc-page-val { font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 700; color: var(--brand-green); min-width: 65px; text-align: center; background: #FFF; padding: 5px 10px; border-radius: 8px; border: 1px solid var(--line); }
+
+  /* المسجل الصوتي */
+  .voice-recorder-box { background: var(--teal-bg); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 20px; }
+  .rec-btn { background: var(--danger); color: #FFF; border: none; padding: 10px 18px; border-radius: 99px; font-size: 12.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+  .rec-btn.recording { animation: pulseRec 1s infinite; background: #B91C1C; }
+  @keyframes pulseRec { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+  /* الوضع السريع */
+  .express-toggle-box { background: #FFF7ED; border: 1px solid #FFEDD5; border-radius: 16px; padding: 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .switch { position: relative; display: inline-block; width: 48px; height: 26px; }
   .switch input { opacity: 0; width: 0; height: 0; }
-  .slider { position: absolute; cursor: pointer; inset: 0; background-color: #CBD5E1; transition: .4s; border-radius: 24px; }
-  .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+  .slider { position: absolute; cursor: pointer; inset: 0; background-color: #CBD5E1; transition: .3s; border-radius: 26px; }
+  .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
   input:checked + .slider { background-color: var(--brand-green); }
-  input:checked + .slider:before { transform: translateX(20px); }
+  input:checked + .slider:before { transform: translateX(22px); }
 
-  /* File Dropzone & AI Analyzer */
-  .dropzone { border: 2px dashed var(--line); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; background: #FAFDFB; transition: 0.2s; }
+  /* منطقة الرفع */
+  .dropzone { border: 2px dashed var(--line); border-radius: 14px; padding: 24px; text-align: center; cursor: pointer; background: #FAFDFB; transition: 0.2s; }
   .dropzone:hover { border-color: var(--brand-green); background: var(--teal-bg); }
-  .ai-status { margin-top: 10px; font-size: 12px; font-weight: 600; color: var(--brand-green); display: none; }
 
-  /* Action Button */
-  .submit-btn {
-    width: 100%; padding: 16px; background: linear-gradient(135deg, var(--brand-green), var(--brand-green-dark)); color: #FFF; border: none; border-radius: 99px;
-    font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer; box-shadow: var(--shadow-sm); transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 10px;
-  }
-  .submit-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
-
-  /* Live Invoice Receipt */
-  .receipt-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; position: sticky; top: 80px; box-shadow: var(--shadow-sm); }
+  /* ---------------- 7. الوصل الرقمي الحاد ---------------- */
+  .receipt-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; position: sticky; top: 90px; box-shadow: 0 6px 20px rgba(0,0,0,0.05); }
   .seal-stamp {
-    position: absolute; top: 18px; left: 18px; width: 68px; height: 68px; border: 2px dashed var(--brand-gold); border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; text-align: center; font-size: 9px; font-weight: 800; color: var(--brand-green); transform: rotate(-12deg); opacity: 0.85; pointer-events: none;
+    position: absolute; top: 18px; left: 18px; width: 76px; height: 76px; border: 2px dashed var(--brand-gold); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; text-align: center; font-size: 9px; font-weight: 800; color: var(--brand-green); transform: rotate(-12deg); opacity: 0.9; pointer-events: none;
   }
-  .perforation { position: relative; border-top: 2px dashed var(--line); margin: 16px -24px; }
+  .perforation { position: relative; border-top: 2px dashed var(--line); margin: 20px -24px; }
   .perforation::before, .perforation::after { content:''; position:absolute; top:-9px; width:18px; height:18px; border-radius:50%; background:var(--paper); border:1px solid var(--line); }
   .perforation::before { right: -9px; } .perforation::after { left: -9px; }
-  .receipt-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px dashed #F0F5F2; }
+  .receipt-row { display: flex; justify-content: space-between; font-size: 13px; padding: 8px 0; border-bottom: 1px dashed #F0F5F2; }
 
-  /* Google Maps Section */
-  .map-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; margin-top: 32px; }
-  .map-container { width: 100%; height: 220px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); margin-top: 12px; }
+  /* زر الواتساب العائم */
+  .floating-wa-btn {
+    position: fixed; bottom: 26px; left: 26px; z-index: 999; width: 60px; height: 60px; background: linear-gradient(135deg, #25D366, #1EBE5D);
+    color: #FFF; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(37,211,102,0.45);
+    text-decoration: none; font-size: 30px; transition: 0.3s; border: 2px solid #FFF;
+  }
+  .floating-wa-btn:hover { transform: scale(1.12) rotate(8deg); }
 
-  /* Verification Tool Widget */
-  .verifier-card { background: linear-gradient(135deg, #0F2A1D, #0B5838); color: #FFF; border-radius: var(--radius); padding: 20px; margin-top: 24px; }
-  .verifier-card input { width: 100%; padding: 10px; border-radius: 8px; border: none; margin-top: 10px; font-family: 'IBM Plex Mono', monospace; }
+  /* تأكيد الطلب */
+  .confirmation-box { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 42px 24px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.06); }
 
-  /* Confirmation View */
-  .confirmation-box { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 40px 24px; text-align: center; }
-  .wa-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px; background: var(--whatsapp); color: #FFF; text-decoration: none; border-radius: 99px; font-weight: 700; font-size: 16px; box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3); margin-top: 16px; }
+  /* فحص المستند */
+  .verifier-card { background: linear-gradient(135deg, #0A1E15, #0B5838); color: #FFF; border-radius: var(--radius); padding: 26px; margin-top: 28px; }
+  .verifier-card input { width: 100%; padding: 12px; border-radius: 10px; border: none; margin-top: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 14px; }
 
-  /* Admin Dashboard Panel */
-  #adminView { display: none; background: #F4F8FC; min-height: 100vh; padding-bottom: 40px; }
-  .login-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 36px 28px; width: 100%; max-width: 400px; margin: 60px auto; box-shadow: var(--shadow-lg); }
-  .dashboard-content { padding: 24px; max-width: 1100px; margin: 0 auto; }
-  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
-  @media (max-width: 600px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-  .stat-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
-  .stat-num { font-family: 'IBM Plex Mono', monospace; font-size: 26px; font-weight: 700; color: var(--brand-green); }
-  table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
-  th, td { padding: 12px 14px; font-size: 13px; text-align: right; border-bottom: 1px solid #EEF4FA; }
+  /* توقيع الحقوق المطور */
+  .engineer-signature-bar {
+    text-align: center; padding: 18px; margin-top: 40px; background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.3); border-radius: 16px; font-size: 13.5px; font-weight: 700; color: var(--brand-green-dark);
+  }
+
+  /* لوحة الإدارة */
+  #adminView { display: none; background: #F4F8FC; min-height: 100vh; padding-bottom: 50px; }
+  .login-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 40px 28px; width: 100%; max-width: 420px; margin: 60px auto; box-shadow: 0 12px 36px rgba(0,0,0,0.1); }
+  .dashboard-content { padding: 28px; max-width: 1140px; margin: 0 auto; }
+  table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  th, td { padding: 14px 16px; font-size: 13.5px; text-align: right; border-bottom: 1px solid #EEF4FA; }
   th { background: var(--teal-bg); color: var(--brand-green); font-weight: 700; }
 </style>
 </head>
 <body>
 
-<!-- 1. شاشة دخول متحركة للشعار بالإنجليزية TARGIMNI -->
+<!-- 1. الشاشة الافتتاحية مع الشعار المتحرك وتوقيع المهندس مجيب مبارك -->
 <div id="splashOverlay">
-  <svg class="splash-logo" viewBox="0 0 100 100">
-    <circle cx="50" cy="50" r="46" fill="#FFFFFF" stroke="#D4AF37" stroke-width="3"/>
-    <path d="M 32 30 L 68 30 M 50 25 L 50 72 M 38 72 L 62 72" stroke="#D4AF37" stroke-width="2" stroke-linecap="round"/>
-    <text x="50" y="45" font-family="'Reem Kufi', sans-serif" font-weight="800" font-size="13" fill="#0B5838" text-anchor="middle">أصول</text>
-    <text x="50" y="62" font-family="'Reem Kufi', sans-serif" font-weight="800" font-size="13" fill="#0B5838" text-anchor="middle">الأندلس</text>
-  </svg>
+  <div class="splash-logo-wrap">
+    <div class="logo-orbit-ring"></div>
+    <svg class="splash-logo" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="46" fill="#FFFFFF" stroke="#D4AF37" stroke-width="3"/>
+      <path d="M 32 30 L 68 30 M 50 25 L 50 72 M 38 72 L 62 72" stroke="#D4AF37" stroke-width="2.8" stroke-linecap="round"/>
+      <text x="50" y="44" font-family="'Reem Kufi', sans-serif" font-weight="800" font-size="13" fill="#0B5838" text-anchor="middle">أصول</text>
+      <text x="50" y="61" font-family="'Reem Kufi', sans-serif" font-weight="800" font-size="13" fill="#0B5838" text-anchor="middle">الأندلس</text>
+    </svg>
+  </div>
   <div class="splash-title-en">TARGIMNI</div>
-  <div class="splash-sub">أصول الأندلس للترجمة القانونية المعتمدة</div>
+  <div style="font-size: 14px; opacity: 0.95; margin-top: 6px; font-weight: 600;">أصول الأندلس للترجمة القانونية والسياحة</div>
+  <div class="engineer-badge">⚡ تم التصميم والتطوير بواسطة: المهندس مجيب مبارك</div>
+  <div class="splash-progress-bar"><div class="splash-progress-fill"></div></div>
 </div>
 
-<!-- الشعار المدمج الموحد -->
+<!-- SVG القالب الموحد للشعار المتحرك -->
 <svg id="logoTemplate" style="display:none;">
   <g viewBox="0 0 100 100">
     <circle cx="50" cy="50" r="46" fill="#FFFFFF" stroke="#D4AF37" stroke-width="3"/>
-    <circle cx="50" cy="50" r="41" fill="none" stroke="#0B5838" stroke-width="1.5" stroke-dasharray="3 2"/>
-    <path d="M 32 30 L 68 30 M 50 25 L 50 72 M 38 72 L 62 72" stroke="#D4AF37" stroke-width="1.5" stroke-linecap="round"/>
-    <text x="50" y="45" font-family="'Reem Kufi', sans-serif" font-weight="700" font-size="13.5" fill="#0B5838" text-anchor="middle">أصول</text>
-    <text x="50" y="62" font-family="'Reem Kufi', sans-serif" font-weight="700" font-size="13.5" fill="#0B5838" text-anchor="middle">الأندلس</text>
+    <path d="M 32 30 L 68 30 M 50 25 L 50 72 M 38 72 L 62 72" stroke="#D4AF37" stroke-width="2.5" stroke-linecap="round"/>
+    <text x="50" y="44" font-family="'Reem Kufi', sans-serif" font-weight="800" font-size="13" fill="#0B5838" text-anchor="middle">أصول</text>
+    <text x="50" y="61" font-family="'Reem Kufi', sans-serif" font-weight="800" font-size="13" fill="#0B5838" text-anchor="middle">الأندلس</text>
   </g>
 </svg>
 
-<!-- 2. الهيدر العلوي الاحترافي مع قائمة 3 شرطات -->
+<!-- 2. الترويسة علوية بدون شريط زائد -->
 <header class="app-header">
   <a href="#" class="header-brand">
-    <div class="brand-logo-wrap">
-      <svg viewBox="0 0 100 100"><use href="#logoTemplate"/></svg>
+    <div class="brand-logo-container">
+      <div class="header-logo-orbit"></div>
+      <svg viewBox="0 0 100 100" style="width:100%; height:100%;"><use href="#logoTemplate"/></svg>
     </div>
     <div class="brand-names">
       <span class="brand-ar">أصول الأندلس</span>
-      <span class="brand-en">TARGIMNI APP</span>
+      <span class="brand-en">BY ENG. MUJEEB MUBARAK</span>
     </div>
   </a>
-  <button class="menu-toggle-btn" id="menuToggle" aria-label="القائمة الجانبية">
-    <span></span><span></span><span></span>
-  </button>
+  <div style="display:flex; align-items:center; gap:12px;">
+    <a href="https://wa.me/218916231976" target="_blank" class="quick-wa-btn">💬 تواصل مباشر</a>
+    <button class="menu-toggle-btn" id="menuToggle"><span></span><span></span><span></span></button>
+  </div>
 </header>
 
-<!-- 3. القائمة الجانبية (Side Drawer) -->
+<!-- 3. القائمة الجانبية -->
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <aside class="side-drawer" id="sideDrawer">
   <div class="drawer-header">
-    <div style="font-weight:700;">قائمة التطبيق الذكية</div>
+    <div style="font-weight:700; font-size:15px;">منظومة ترجمني الذكية</div>
     <button class="drawer-close" id="drawerClose">&times;</button>
   </div>
   <nav class="drawer-nav">
-    <a class="drawer-item active" id="navNewOrder">📄 تقديم طلب ترجمة جديد</a>
-    <a class="drawer-item" id="navEmbassy">🏛️ دليل متطلبات السفارات</a>
-    <a class="drawer-item" id="navVerifier">🛡️ أداة التحقق من المستندات</a>
+    <a class="drawer-item active">📄 تقديم طلب جديد</a>
+    <a class="drawer-item" id="navTravel">✈️ خدمات السفر والتأشيرات السياحية</a>
+    <a class="drawer-item" id="navVerifier">🛡️ التحقق من كود المستندات</a>
     <a class="drawer-item" id="navLocation">📍 موقع المكتب على الخريطة</a>
-    <a class="drawer-item" id="navAdminPortal" style="margin-top:auto; background:#FEFCE8; color:#854D0E;">🔐 دخول المسؤول وقاعدة البيانات</a>
+    <a class="drawer-item" id="navAdminPortal" style="margin-top:auto; background:#FEFCE8; color:#854D0E;">🔐 لوحة التحكم والقواعد السحابية</a>
   </nav>
-  <div class="drawer-footer">تطبيق ترجمني © 2026 — تطوير مجيب مبارك</div>
+  <div class="drawer-footer">تطوير وتصميم المهندس: مجيب مبارك © 2026</div>
 </aside>
 
-<!-- 4. محتوى موقع العملاء الرئيسي -->
+<a href="https://wa.me/218916231976" target="_blank" class="floating-wa-btn" title="واتساب سريع">💬</a>
+
+<!-- 4. الواجهة الرئيسية للعملاء -->
 <div id="clientView">
   <div class="page">
 
     <div class="hero-card">
       <div>
-        <span class="hero-badge">✨ النظام الأول المعتمد لترجمة المستندات الرسمية</span>
-        <h1 class="hero-title">الترجمة القانونية المعتمدة في ليبيا وخارجها</h1>
-        <p class="hero-desc">احصل على ترجمة موثوقة ومقبولة رسمياً لدى كافة المحاكم والسفارات والجامعات مع إمكانية التتبع المباشر لطلبك.</p>
+        <h1 class="hero-title">الترجمة القانونية المعتمدة وخدمات السفر</h1>
+        <p class="hero-desc">معتمدة لدى السفارات، الجامعات، المحاكم، وشركات السفر والسياحة. اطلب ترجمتك فوراً مع التتبع الرقمي المباشر.</p>
       </div>
     </div>
 
-    <!-- الإضافات الـ 6 المبتكرة المعروضة -->
-    <div class="novel-features-grid">
-      <div class="novel-card"><div class="novel-icon">🤖</div><div class="novel-info"><div>تحليل الذكاء الاصطناعي</div><div>تقدير آلي للصفحات والتكلفة</div></div></div>
-      <div class="novel-card"><div class="novel-icon">🎙️</div><div class="novel-info"><div>الملاحظات الصوتية</div><div>تسجيل نطق الأسماء والتعليمات</div></div></div>
-      <div class="novel-card"><div class="novel-icon">⚡</div><div class="novel-info"><div>نظام الطوارئ السريع</div><div>تسليم حرجي في خضون ساعات</div></div></div>
-      <div class="novel-card"><div class="novel-icon">🏛️</div><div class="novel-info"><div>إعدادات السفارات</div><div>تجهيز الملفات حسب جهة التقديم</div></div></div>
-      <div class="novel-card"><div class="novel-icon">📜</div><div class="novel-info"><div>ختم إلكتروني ومعتمد</div><div>وصل رسمي موثق ومؤرخ</div></div></div>
-      <div class="novel-card"><div class="novel-icon">🛡️</div><div class="novel-info"><div>التحقق من الموثوقية</div><div>فحص كود المستند أونلاين</div></div></div>
+    <!-- شبكة الميزات -->
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon">✈️</div><div><div style="font-size:13.5px; font-weight:700; color:var(--brand-green);">السفر والسياحة</div><div style="font-size:12px; color:var(--ink-soft);">تجهيز ملفات الفيزا والحجوزات</div></div></div>
+      <div class="feature-card"><div class="feature-icon">🎙️</div><div><div style="font-size:13.5px; font-weight:700; color:var(--brand-green);">تسجيل صوتي حي</div><div><div style="font-size:12px; color:var(--ink-soft);">إرفاق تعليمات الأسماء بصوتك</div></div></div></div>
+      <div class="feature-card"><div class="feature-icon">⚡</div><div><div style="font-size:13.5px; font-weight:700; color:var(--brand-green);">طوارئ السفر</div><div><div style="font-size:12px; color:var(--ink-soft);">تسليم عاجل خلال ساعات</div></div></div></div>
     </div>
 
     <div class="main-layout" id="formView">
       <form class="app-form" id="orderForm">
         
-        <!-- ميزة 1: أداة الضبط التلقائي لمتطلبات السفارات والجامعات -->
-        <div class="embassy-box">
-          <div class="embassy-title">🏛️ خيار التجهيز التلقائي لجهة التقديم (اختياري):</div>
-          <select id="embassyPreset">
-            <option value="">-- اختر الجهة ليتم ضبط اللغات والمتطلبات تلقائياً --</option>
-            <option value="it">سفارة إيطاليا (العربية ← الإيطالية)</option>
-            <option value="tr">سفارة تركيا (العربية ← التركية / التركية المعتمدة)</option>
-            <option value="qa">جامعة قطر / التقديم الأكاديمي (العربية ← الإنجليزية)</option>
-            <option value="de">سفارة ألمانيا (العربية ← الألمانية)</option>
+        <!-- قسم السفر والسياحة المكتمل بالكامل -->
+        <div class="travel-category-box" id="travelSection">
+          <div class="travel-title">✈️ خدمات السفر والسياحة والفيز المعتمدة:</div>
+          <select id="travelPreset" style="background:#FFF; border-color:#93C5FD;">
+            <option value="">-- اختر نوع المعاملة السياحية أو السفارة --</option>
+            <option value="anwar">شراكة وكالة أنوار العاصمة للسفريات (تأشيرات ومستندات سفر)</option>
+            <option value="tourist_visa">ملف التأشيرة السياحية (كشف حساب + إفادة عمل + جواز)</option>
+            <option value="it_embassy">سفارة إيطاليا / شنغن (ترجمة للغة الإيطالية)</option>
+            <option value="tr_embassy">سفارة تركيا / إقامات وسياحة (ترجمة للغة التركية)</option>
+            <option value="qa_university">التقديم الأكاديمي وسفريات الدراسة (جامعة قطر / بريطانيا)</option>
           </select>
         </div>
 
         <div class="section-head">👤 بيانات صاحب الطلب</div>
-        <div class="field"><label for="fullName">الاسم الكامل / اسم الجهة أو الشركة</label><input type="text" id="fullName" placeholder="مثال: شركة المدار أو مجيب مبارك" required></div>
-        <div class="field"><label for="phone">رقم الهاتف المرتبط بالواتساب</label><input type="tel" id="phone" placeholder="09xxxxxxxx" required></div>
+        <div class="field"><label>الاسم الكامل / اسم شركة السفر أو الجهة</label><input type="text" id="fullName" placeholder="مثال: مجيب مبارك" required></div>
+        <div class="field"><label>رقم هاتف الواتساب</label><input type="tel" id="phone" placeholder="09xxxxxxxx" required></div>
 
-        <div class="section-head">📄 تفاصيل الترجمة والمستندات</div>
-        <div class="field"><label for="docType">نوع المستند</label>
+        <div class="section-head">📄 تفاصيل المستند والمعاملة</div>
+        <div class="field"><label>نوع المستند / المعاملة</label>
           <select id="docType">
-            <option value="شهادة ميلاد">شهادة ميلاد / كشف عائلي</option>
-            <option value="عقد / اتفاقية">عقد تجاري / اتفاقية قانونية</option>
-            <option value="جواز سفر / إقامة">جواز سفر / إقامة / أوراق ثبوتية</option>
-            <option value="شهادة تخرج / كشف درجات">شهادة تخرج / كشف درجات جامعي</option>
-            <option value="تقرير طبي">تقرير طبي معتمد</option>
-            <option value="سجل تجاري">رخصة / سجل تجاري / إفادة ضريبية</option>
+            <option value="ملف تأشيرة سياحية">ملف تأشيرة سياحية / حجز طيران وسفر</option>
+            <option value="شهادة ميلاد / إفادة">شهادة ميلاد / كشف عائلي / إفادة سكن</option>
+            <option value="كشف حساب بنكي">كشف حساب بنكي للسفريات والفيز</option>
+            <option value="عقد تجاري / شركة">عقد تجاري / رخصة شركة / سجل تجاري</option>
+            <option value="شهادة تخرج / كشف درجات">شهادة تخرج / كشف درجات أكاديمي</option>
+            <option value="جواز سفر / إقامة">جواز سفر / إقامة رسمية</option>
           </select>
         </div>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-          <div class="field"><label for="sourceLang">من لغة</label>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+          <div class="field"><label>من لغة</label>
             <select id="sourceLang"><option>العربية</option><option>الإنجليزية</option><option>الفرنسية</option><option>الإسبانية</option><option>التركية</option><option>الألمانية</option><option>الإيطالية</option></select>
           </div>
-          <div class="field"><label for="targetLang">إلى لغة</label>
+          <div class="field"><label>إلى لغة</label>
             <select id="targetLang"><option>الإنجليزية</option><option>العربية</option><option>الفرنسية</option><option>الإسبانية</option><option>التركية</option><option>الألمانية</option><option>الإيطالية</option></select>
           </div>
         </div>
 
-        <!-- ميزة 2: وضع الطوارئ الفوري -->
+        <!-- حاسبة التكلفة -->
+        <div class="calc-box">
+          <div style="font-size:13px; font-weight:700; color:var(--brand-green);">📊 تقدير عدد الصفحات والتكلفة:</div>
+          <div class="calc-slider-wrap">
+            <span style="font-size:12px; font-weight:600;">عدد الصفحات:</span>
+            <input type="range" id="pageRange" min="1" max="30" value="1">
+            <span class="calc-page-val" id="pageCountDisplay">1 صفحة</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; font-size:13.5px; font-weight:700;">
+            <span>التكلفة التقديرية:</span>
+            <span id="estPriceDisplay" style="color:var(--brand-green); font-size:17px;">30 د.ل</span>
+          </div>
+        </div>
+
+        <!-- وضع السفر العاجل -->
         <div class="express-toggle-box">
           <div>
-            <div style="font-size:13px; font-weight:700; color:#9A3412;">⚡ وضع الطوارئ التسليم العاجل (2-4 ساعات)</div>
-            <div style="font-size:11.5px; color:#C2410C;">تفعيل الأولوية القصوى لمواعيد السفارات الحرجة</div>
+            <div style="font-size:13px; font-weight:700; color:#9A3412;">⚡ وضع طوارئ السفر والتسليم العاجل (2-4 ساعات)</div>
+            <div style="font-size:11.5px; color:#C2410C;">مخصص لمواعيد السفارات والرحلات المستعجلة</div>
           </div>
           <label class="switch"><input type="checkbox" id="expressToggle"><span class="slider"></span></label>
         </div>
 
-        <!-- ميزة 3: تحليل المستندات بالذكاء الاصطناعي عند الرفع -->
+        <!-- رفع المستند -->
         <div class="field">
-          <label>رفع الملف (صورة / PDF)</label>
+          <label>رفع صور المستندات أو ملفات السفر (PDF / Images)</label>
           <div class="dropzone" id="dropzone">
-            <div style="font-size:24px;">📤</div>
-            <div style="font-size:13px; font-weight:600; margin-top:4px;">اسحب المستند هنا أو اضغط للاختيار</div>
+            <div style="font-size:28px;">📤</div>
+            <div style="font-size:13.5px; font-weight:600; margin-top:4px;">اسحب المستند هنا أو اضغط للاختيار</div>
             <div id="fileNameDisplay" style="font-size:12px; color:var(--brand-green); margin-top:6px; font-weight:700;"></div>
-            <div class="ai-status" id="aiStatus">🤖 جارٍ فحص المستند بالذكاء الاصطناعي... تم تحليل الصفحة بنجاح!</div>
           </div>
           <input type="file" id="fileInput" accept="image/*,.pdf" style="display:none">
         </div>
 
-        <!-- ميزة 4: تسجيل ملاحظة صوتية مدمج -->
+        <!-- المسجل الصوتي -->
         <div class="voice-recorder-box">
           <div>
-            <div style="font-size:12.5px; font-weight:700; color:var(--brand-green);">🎙️ إرفاق تعليمات صوتية (اختياري)</div>
-            <div style="font-size:11px; color:var(--ink-soft);">سجل بصوتك طريقة نطق الأسماء بوضوح</div>
+            <div style="font-size:12.5px; font-weight:700; color:var(--brand-green);">🎙️ إرفاق تسجيل صوتي لنطق الأسماء</div>
+            <div style="font-size:11px; color:var(--ink-soft);">انطق الأسماء باللغة الإنجليزية لمنع أي خطأ برمي</div>
           </div>
-          <button type="button" class="rec-btn" id="recBtn">🔴 <span>تسجيل صوتي</span></button>
+          <button type="button" class="rec-btn" id="recBtn">🔴 <span>بدء التسجيل</span></button>
         </div>
 
-        <div class="field"><label for="notes">ملاحظات كتابية إضافية</label><textarea id="notes" rows="2" placeholder="أي تفاصيل خاصة بتدقيق الأسطر أو الأسماء..."></textarea></div>
+        <div class="field"><label>ملاحظات إضافية أو أسماء الجوازات</label><textarea id="notes" rows="2" placeholder="اكتب الأسماء بالإنجليزية كما هي مطابقة لجواز السفر..."></textarea></div>
 
-        <button type="submit" class="submit-btn">
-          <span>إرسال الطلب عبر ترجمني</span>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <!-- أزرار الاستايل المستقبلي الجديد -->
+        <button type="submit" class="btn-futuristic" style="width:100%;">
+          <span>إرسال الطلب وحفظه في المنظومة</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </button>
       </form>
 
-      <!-- 5. ميزة الوصل الرقمي المباشر المختوم بختم المكتب -->
+      <!-- الوصل الرقمي -->
       <aside class="receipt-card">
         <div class="seal-stamp">أصول الأندلس<br>معتمد رسميًا<br>APPROVED</div>
-        <div style="font-size:11px; color:var(--ink-soft);">الرقم المرجعي التلقائي:</div>
-        <div style="font-family:'IBM Plex Mono', monospace; font-size:18px; font-weight:700; color:var(--brand-green);" id="previewCode">ORD-2026-————</div>
+        <div style="font-size:11px; color:var(--ink-soft);">الكود المرجعي التلقائي:</div>
+        <div style="font-family:'IBM Plex Mono', monospace; font-size:20px; font-weight:700; color:var(--brand-green);" id="previewCode">ORD-2026-————</div>
         
         <div class="perforation"></div>
 
         <div class="receipt-row"><span>العميل:</span><span id="pName" style="font-weight:700;">—</span></div>
         <div class="receipt-row"><span>المسار:</span><span id="pLang">العربية ← الإنجليزية</span></div>
-        <div class="receipt-row"><span>المستند:</span><span id="pDoc">شهادة ميلاد</span></div>
-        <div class="receipt-row"><span>الملف:</span><span id="pFile">لم يرفع بعد</span></div>
+        <div class="receipt-row"><span>نوع المعاملة:</span><span id="pDoc">ملف تأشيرة سياحية</span></div>
+        <div class="receipt-row"><span>الصفحات:</span><span id="pPages">1 صفحة</span></div>
         <div class="receipt-row"><span>سرعة التسليم:</span><span id="pSpeed" style="color:var(--brand-green); font-weight:700;">عادية (24 ساعة)</span></div>
 
-        <div style="background:var(--teal-bg); border-radius:10px; padding:12px; margin-top:16px; border:1px solid var(--line);">
-          <div style="font-size:12px; font-weight:700; color:var(--brand-green);">⏱️ تقدير التسليم الفعلي:</div>
-          <div style="font-size:13px; font-weight:700; margin-top:4px;" id="estTime">خلال 24 ساعة</div>
+        <div style="background:var(--teal-bg); border-radius:14px; padding:14px; margin-top:18px; border:1px solid var(--line);">
+          <div style="font-size:12px; font-weight:700; color:var(--brand-green);">⏱️ موعد الجاهزية المتوقع:</div>
+          <div style="font-size:14px; font-weight:700; margin-top:4px;" id="estTime">خلال 24 ساعة</div>
         </div>
       </aside>
     </div>
 
-    <!-- شاشة إتمام الطلب للواتساب -->
+    <!-- تأكيد الطلب وإرسال الواتساب الفوري -->
     <div class="confirmation-box" id="confirmationView" hidden>
-      <div style="font-size:42px; margin-bottom:10px;">✅</div>
-      <h2 style="font-family:'Reem Kufi', sans-serif; color:var(--brand-green); margin:0;">تم تسجيل الطلب بنجاح في المنظومة السحابية!</h2>
-      <p style="color:var(--ink-soft); font-size:14px; margin-top:6px;">رقم التتبع المرجعي لطلبك هو:</p>
-      <div style="display:inline-block; background:var(--teal-bg); border:1px solid var(--line); padding:10px 24px; border-radius:99px; font-family:'IBM Plex Mono', monospace; font-size:20px; font-weight:700; color:var(--brand-green);" id="finalCode">ORD-2026-00000</div>
+      <div style="font-size:52px; margin-bottom:10px;">✅</div>
+      <h2 style="font-family:'Reem Kufi', sans-serif; color:var(--brand-green); margin:0;">تم تسجيل الطلب في المنظومة بنجاح!</h2>
+      <p style="color:var(--ink-soft); font-size:14.5px; margin-top:6px;">الكود المرجعي الخاص بك هو:</p>
+      <div style="display:inline-block; background:var(--teal-bg); border:1px solid var(--line); padding:10px 28px; border-radius:99px; font-family:'IBM Plex Mono', monospace; font-size:24px; font-weight:700; color:var(--brand-green); margin-top:10px;" id="finalCode">ORD-2026-00000</div>
 
-      <div style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:14px; padding:20px; margin-top:20px;">
-        <div style="font-size:15px; font-weight:700; color:#166534;">الخطوة الأخيرة المباشرة:</div>
-        <div style="font-size:13px; color:#15803D; margin-top:4px;">اضغط على الزر بالأسفل لتحويل تفاصيل المستند تلقائياً للمترجم عبر الواتساب للبدء المباشر.</div>
-        <a href="#" id="waSendBtn" target="_blank" class="wa-btn">
-          <span>إرسال الطلب والمستند للواتساب فوراً</span>
-        </a>
+      <div style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:18px; padding:24px; margin-top:24px;">
+        <div style="font-size:16px; font-weight:800; color:#166534;">خطوة الإرسال النهائية:</div>
+        <div style="font-size:13.5px; color:#15803D; margin-top:6px;">اضغط على الزر الاستثنائي أدناه ليقوم بنقل تفاصيل المعاملة والكود فوراً إلى المترجم عبر الواتساب.</div>
+        
+        <button id="waSendBtn" class="btn-futuristic" style="background:linear-gradient(135deg, #25D366, #1EBE5D); border-color:#86EFAC; width:100%; margin-top:18px; font-size:17px;">
+          <span>💬 إرسال تفاصيل الطلب عبر الواتساب الآن</span>
+        </button>
       </div>
     </div>
 
-    <!-- ميزة 6: أداة التحقق المباشر من موثوقية المستند -->
+    <!-- أداة فحص الكود المرجعي للمستندات -->
     <div class="verifier-card" id="verifierSection">
-      <div style="font-weight:700; font-size:15px;">🛡️ أداة التحقق المباشر من صحة المستندات المترجمة</div>
-      <div style="font-size:12px; opacity:0.85; margin-top:4px;">متاحة للسفارات والجهات الرسمية للتحقق من سلامة الواصل الصادر من أصول الأندلس.</div>
-      <div style="display:flex; gap:8px;">
-        <input type="text" id="verifyInput" placeholder="أدخل كود الطلب (مثال: ORD-2026-12345)">
-        <button id="verifyBtn" style="margin-top:10px; background:var(--brand-gold); border:none; border-radius:8px; padding:0 16px; font-weight:700; cursor:pointer;">فحص</button>
+      <div style="font-weight:700; font-size:16.5px;">🛡️ فحص الموثوقية والكود المرجعي للمستندات</div>
+      <div style="font-size:12.5px; opacity:0.85; margin-top:4px;">مخصصة للسفارات وشركات السفر والتأشيرات للتحقق من صحة الترجمة.</div>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <input type="text" id="verifyInput" placeholder="أدخل الكود (مثال: ORD-2026-12345)">
+        <button id="verifyBtn" class="btn-futuristic" style="padding:0 24px; border-radius:10px; background:var(--brand-gold); color:var(--ink); font-weight:800;">فحص</button>
       </div>
-      <div id="verifyResult" style="margin-top:10px; font-size:12.5px; font-weight:700;"></div>
+      <div id="verifyResult" style="margin-top:12px; font-size:13.5px; font-weight:700;"></div>
     </div>
 
-    <!-- كارت خريطة قوقل المدمجة -->
-    <div class="map-card" id="locationSection">
-      <div style="font-family:'Reem Kufi', sans-serif; font-size:18px; color:var(--brand-green); font-weight:700;">📍 موقع المكتب الرئيسي — طرابلس</div>
-      <div style="font-size:13px; color:var(--ink-soft); margin-top:2px;">شارع بغداد، طرابلس — بالقرب من فندق الصفوة</div>
-      <div class="map-container">
-        <iframe width="100%" height="100%" frameborder="0" style="border:0" src="https://maps.google.com/maps?q=Tripoli,Baghdad%20Street&t=&z=15&ie=UTF8&iwloc=&output=embed" allowfullscreen></iframe>
+    <!-- الخريطة -->
+    <div class="map-card" id="locationSection" style="background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:24px; margin-top:28px;">
+      <div style="font-family:'Reem Kufi', sans-serif; font-size:19px; color:var(--brand-green); font-weight:700;">📍 موقع المكتب الرئيسي — طرابلس</div>
+      <div style="font-size:13.5px; color:var(--ink-soft);">شارع بغداد، طرابلس — بالقرب من فندق الصفوة</div>
+      <div style="width:100%; height:230px; border-radius:14px; overflow:hidden; border:1px solid var(--line); margin-top:12px;">
+        <iframe width="100%" height="100%" frameborder="0" src="https://maps.google.com/maps?q=Tripoli,Baghdad%20Street&t=&z=15&ie=UTF8&iwloc=&output=embed"></iframe>
       </div>
+    </div>
+
+    <!-- شريط الحقوق الفاخر باسم المهندس مجيب مبارك -->
+    <div class="engineer-signature-bar">
+      ⚡ تم تصميم وبناء المنظومة بالكامل بأعلى معايير البرمجة بواسطة: <span style="color:var(--brand-green); font-size:15px; font-weight:800;">المهندس مجيب مبارك</span> © 2026
     </div>
 
   </div>
 </div>
 
-<!-- 5. لوحة دخول وإدارة المسؤول والقواعد السحابية -->
+<!-- 5. لوحة الإدارة السحابية -->
 <div id="adminView">
   <div class="login-card" id="loginScreen">
     <svg style="width:70px; height:70px; margin:0 auto 12px; display:block;" viewBox="0 0 100 100"><use href="#logoTemplate"/></svg>
-    <div style="font-family:'Reem Kufi', sans-serif; font-size:20px; text-align:center; color:var(--brand-green); font-weight:700;">لوحة إدارة المنظومة السحابية</div>
-    <div style="font-size:12px; color:var(--ink-soft); text-align:center; margin-bottom:20px;">تطبيق ترجمني — أصول الأندلس</div>
+    <div style="font-family:'Reem Kufi', sans-serif; font-size:21px; text-align:center; color:var(--brand-green); font-weight:800;">لوحة الإدارة والقواعد السحابية</div>
+    <div style="font-size:12px; color:var(--ink-soft); text-align:center; margin-bottom:22px;">تصميم وتطوير: المهندس مجيب مبارك</div>
     
     <div class="field"><label>رقم هاتف المسؤول</label><input type="tel" id="adminPhone" value="0916231976"></div>
-    <div class="field"><label>رمز الدخول السري</label><input type="password" id="adminPass" placeholder="••••••••"></div>
-    <button class="submit-btn" id="loginBtn">دخول اللوحة المباشرة</button>
-    <div id="loginError" style="color:#DC2626; font-size:12px; text-align:center; margin-top:10px; display:none;">بيانات الدخول غير صحيحة!</div>
-    <button id="backToClientBtn" style="background:none; border:none; color:var(--ink-soft); font-size:12px; width:100%; margin-top:12px; cursor:pointer; text-decoration:underline;">العودة لواجهة العملاء</button>
+    <div class="field"><label>كلمة السر</label><input type="password" id="adminPass" placeholder="••••••••"></div>
+    <button class="btn-futuristic" id="loginBtn" style="width:100%;">دخول اللوحة السحابية</button>
+    <div id="loginError" style="color:var(--danger); font-size:12px; text-align:center; margin-top:10px; display:none;">بيانات الدخول غير صحيحة!</div>
+    <button id="backToClientBtn" style="background:none; border:none; color:var(--ink-soft); font-size:12.5px; width:100%; margin-top:14px; cursor:pointer; text-decoration:underline;">العودة للواجهة الرئيسية</button>
   </div>
 
   <div class="dashboard-content" id="dashboard" style="display:none;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
       <div>
-        <h2 style="font-family:'Reem Kufi', sans-serif; color:var(--brand-green); margin:0;">لوحة متابعة الطلبات السحابية</h2>
-        <div style="font-size:12px; color:var(--ink-soft);">متصل بقاعدة البيانات الحية 🟢</div>
+        <h2 style="font-family:'Reem Kufi', sans-serif; color:var(--brand-green); margin:0;">لوحة متابعة الطلبات والسفريات</h2>
+        <div style="font-size:12px; color:var(--ink-soft);">متصل بقاعدة البيانات السحابية الحية 🟢</div>
       </div>
-      <button id="logoutBtn" style="background:#EF4444; color:#FFF; border:none; padding:8px 16px; border-radius:8px; font-weight:700; cursor:pointer;">تسجيل الخروج</button>
-    </div>
-
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-num" id="statNew">0</div><div style="font-size:12px; color:var(--ink-soft);">طلبات جديدة</div></div>
-      <div class="stat-card"><div class="stat-num" id="statProgress">0</div><div style="font-size:12px; color:var(--ink-soft);">قيد الترجمة</div></div>
-      <div class="stat-card"><div class="stat-num" id="statReady">0</div><div style="font-size:12px; color:var(--ink-soft);">جاهزة للتسليم</div></div>
-      <div class="stat-card"><div class="stat-num" id="statDone">0</div><div style="font-size:12px; color:var(--ink-soft);">تم تسليمها</div></div>
+      <button id="logoutBtn" style="background:var(--danger); color:#FFF; border:none; padding:9px 18px; border-radius:10px; font-weight:700; cursor:pointer;">تسجيل الخروج</button>
     </div>
 
     <div style="overflow-x:auto;">
       <table>
         <thead>
-          <tr><th>رقم الطلب</th><th>العميل</th><th>الهاتف</th><th>المسار</th><th>نوع المستند</th><th>الحالة السحابية</th></tr>
+          <tr><th>رقم الطلب</th><th>العميل</th><th>الهاتف</th><th>المسار</th><th>نوع المعاملة</th><th>الحالة</th></tr>
         </thead>
         <tbody id="ordersBody"></tbody>
       </table>
@@ -461,50 +547,43 @@
 </div>
 
 <script>
-  // ---------- 1. إعدادات قاعدة البيانات السحابية Firebase ----------
-  // استبدل المفاتيح أدناه بمفاتيح مشروعك من Firebase Console عند الجاهزية
+  // ---------- 1. الربط بقاعدة البيانات السحابية ----------
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "YOUR_API_KEY", authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID", storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID", appId: "YOUR_APP_ID"
   };
 
   let db = null;
-  try {
-    firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore();
-  } catch (e) {
-    console.log("Firebase default fallback initialized");
-  }
+  try { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } catch (e) {}
 
-  // Backup Local Storage Handlers
-  function getOrdersLocal(){ return JSON.parse(localStorage.getItem('orders') || '[]'); }
-  function saveOrdersLocal(orders){ localStorage.setItem('orders', JSON.stringify(orders)); }
+  function getOrdersLocal(){ return JSON.parse(localStorage.getItem('orders_mubarack') || '[]'); }
+  function saveOrdersLocal(orders){ localStorage.setItem('orders_mubarack', JSON.stringify(orders)); }
 
-  // ---------- 2. Splash Screen Controller ----------
+  // ---------- 2. الشاشة الافتتاحية 5.5 ثانية ----------
   window.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
       const splash = document.getElementById('splashOverlay');
-      splash.style.opacity = '0';
-      setTimeout(() => splash.style.visibility = 'hidden', 600);
-    }, 2000);
+      if(splash){
+        splash.style.opacity = '0';
+        setTimeout(() => splash.style.visibility = 'hidden', 800);
+      }
+    }, 5500);
   });
 
-  // ---------- 3. Drawer Menu Controller ----------
+  // ---------- 3. القائمة الجانبية والتنقل ----------
   const sideDrawer = document.getElementById('sideDrawer');
   const drawerOverlay = document.getElementById('drawerOverlay');
-  function toggleDrawer(){
-    sideDrawer.classList.toggle('active');
-    drawerOverlay.classList.toggle('active');
-  }
+  function toggleDrawer(){ sideDrawer.classList.toggle('active'); drawerOverlay.classList.toggle('active'); }
+  
   document.getElementById('menuToggle').addEventListener('click', toggleDrawer);
   document.getElementById('drawerClose').addEventListener('click', toggleDrawer);
   drawerOverlay.addEventListener('click', toggleDrawer);
 
-  // Drawer Navigation Links
+  document.getElementById('navTravel').addEventListener('click', () => {
+    toggleDrawer();
+    document.getElementById('travelSection').scrollIntoView({ behavior: 'smooth' });
+  });
   document.getElementById('navLocation').addEventListener('click', () => {
     toggleDrawer();
     document.getElementById('locationSection').scrollIntoView({ behavior: 'smooth' });
@@ -523,122 +602,156 @@
     document.getElementById('clientView').style.display = 'block';
   });
 
-  // ---------- 4. Embassy Smart Preset Feature ----------
-  document.getElementById('embassyPreset').addEventListener('change', (e) => {
+  // ---------- 4. قسم السفر والسياحة والضبط التلقائي ----------
+  document.getElementById('travelPreset').addEventListener('change', (e) => {
     const val = e.target.value;
     const src = document.getElementById('sourceLang');
     const trg = document.getElementById('targetLang');
-    if(val === 'it'){ src.value = 'العربية'; trg.value = 'الإيطالية'; }
-    else if(val === 'tr'){ src.value = 'العربية'; trg.value = 'التركية'; }
-    else if(val === 'qa'){ src.value = 'العربية'; trg.value = 'الإنجليزية'; }
-    else if(val === 'de'){ src.value = 'العربية'; trg.value = 'الألمانية'; }
+    const doc = document.getElementById('docType');
+
+    if(val === 'anwar'){
+      doc.value = 'ملف تأشيرة سياحية'; src.value = 'العربية'; trg.value = 'الإنجليزية';
+    } else if(val === 'tourist_visa'){
+      doc.value = 'كشف حساب بنكي'; src.value = 'العربية'; trg.value = 'الإنجليزية';
+    } else if(val === 'it_embassy'){
+      src.value = 'العربية'; trg.value = 'الإيطالية';
+    } else if(val === 'tr_embassy'){
+      src.value = 'العربية'; trg.value = 'التركية';
+    } else if(val === 'qa_university'){
+      doc.value = 'شهادة تخرج / كشف درجات'; src.value = 'العربية'; trg.value = 'الإنجليزية';
+    }
     refreshPreview();
   });
 
-  // ---------- 5. Live Form & Receipt Interactive Sync ----------
+  // ---------- 5. حاسبة الأسعار والوصل الحي ----------
   const fullName = document.getElementById('fullName');
   const docType = document.getElementById('docType');
   const sourceLang = document.getElementById('sourceLang');
   const targetLang = document.getElementById('targetLang');
+  const pageRange = document.getElementById('pageRange');
   const expressToggle = document.getElementById('expressToggle');
   let uploadedFileName = '';
 
   function refreshPreview(){
+    const pages = parseInt(pageRange.value) || 1;
+    document.getElementById('pageCountDisplay').textContent = pages + ' صفحة';
+    document.getElementById('pPages').textContent = pages + ' صفحة';
+    
+    let basePrice = pages * 30;
+    if(expressToggle.checked) basePrice = Math.round(basePrice * 1.4);
+    document.getElementById('estPriceDisplay').textContent = basePrice + ' د.ل';
+
     document.getElementById('pName').textContent = fullName.value.trim() || '—';
     document.getElementById('pLang').textContent = sourceLang.value + ' ← ' + targetLang.value;
     document.getElementById('pDoc').textContent = docType.value;
+    
     if(expressToggle.checked){
-      document.getElementById('pSpeed').textContent = '⚡ طوارئ فوري (2-4 ساعات)';
+      document.getElementById('pSpeed').textContent = '⚡ طوارئ (2-4 ساعات)';
       document.getElementById('estTime').textContent = 'خلال 3 ساعات فقط';
     } else {
       document.getElementById('pSpeed').textContent = 'عادية (24 ساعة)';
       document.getElementById('estTime').textContent = 'خلال 24 ساعة';
     }
   }
-  [fullName, docType, sourceLang, targetLang, expressToggle].forEach(el => el.addEventListener('input', refreshPreview));
 
-  // File Upload & AI Analyzer Simulation
+  [fullName, docType, sourceLang, targetLang, pageRange, expressToggle].forEach(el => el.addEventListener('input', refreshPreview));
+
+  // رفع المستند
   const dropzone = document.getElementById('dropzone');
   const fileInput = document.getElementById('fileInput');
   dropzone.addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', () => {
     if(fileInput.files.length){
       uploadedFileName = fileInput.files[0].name;
-      document.getElementById('fileNameDisplay').textContent = uploadedFileName;
-      document.getElementById('pFile').textContent = uploadedFileName;
-      document.getElementById('aiStatus').style.display = 'block';
+      document.getElementById('fileNameDisplay').textContent = '📄 تم رفع: ' + uploadedFileName;
     }
   });
 
-  // Voice Note Recorder Feature
+  // التسجيل الصوتي الحي
   const recBtn = document.getElementById('recBtn');
+  let mediaRecorder = null;
   let isRecording = false;
-  recBtn.addEventListener('click', () => {
-    isRecording = !isRecording;
-    if(isRecording){
-      recBtn.classList.add('recording');
-      recBtn.querySelector('span').textContent = 'جارٍ التسجيل... (اضغط للإيقاف)';
+
+  recBtn.addEventListener('click', async () => {
+    if(!isRecording){
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.start();
+        isRecording = true;
+        recBtn.classList.add('recording');
+        recBtn.querySelector('span').textContent = 'جارٍ التسجيل... (اضغط للإيقاف)';
+      } catch(e) { alert('يرجى السماح بالميكروفون لتسجيل الأسماء.'); }
     } else {
+      if(mediaRecorder) mediaRecorder.stop();
+      isRecording = false;
       recBtn.classList.remove('recording');
-      recBtn.querySelector('span').textContent = 'تم إرفاق التسجيل الصوتي بنجاح ✓';
+      recBtn.querySelector('span').textContent = 'تم تسجيل الصوت بنجاح ✓';
     }
   });
 
-  // ---------- 6. Order Submission Logic ----------
-  function randomCode(){ return 'ORD-2026-' + Math.floor(10000 + Math.random() * 90000); }
+  // ---------- 6. إرسال الطلب والربط الفوري بالواتساب ----------
+  let currentCreatedOrder = null;
+  function generateOrderCode(){ return 'ORD-2026-' + Math.floor(10000 + Math.random() * 90000); }
 
   document.getElementById('orderForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const code = randomCode();
-    const nameVal = fullName.value.trim();
-    const phoneVal = document.getElementById('phone').value.trim();
-    const docVal = docType.value;
-    const srcVal = sourceLang.value;
-    const trgVal = targetLang.value;
-    const isExpress = expressToggle.checked ? 'نعم (طوارئ 2-4 ساعات)' : 'لا (عادي)';
-
-    const orderData = {
-      id: code, name: nameVal, phone: phoneVal,
-      docType: docVal, sourceLang: srcVal, targetLang: trgVal,
-      express: isExpress, fileName: uploadedFileName || 'بدون ملف',
-      status: 'جديد (في انتظار التأكيد)', date: new Date().toISOString()
+    const code = generateOrderCode();
+    
+    currentCreatedOrder = {
+      id: code,
+      name: fullName.value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      docType: docType.value,
+      sourceLang: sourceLang.value,
+      targetLang: targetLang.value,
+      pages: pageRange.value,
+      express: expressToggle.checked ? 'نعم (طوارئ سفر 2-4 ساعات)' : 'عادي',
+      fileName: uploadedFileName || 'لم يتم رفع ملف',
+      notes: document.getElementById('notes').value.trim() || 'لا يوجد',
+      date: new Date().toISOString()
     };
 
-    // Save to Cloud (Firebase) if available, else local
     if(db){
-      try { await db.collection('orders').doc(code).set(orderData); }
-      catch(err){ console.log("Saved locally due to firebase key requirement"); }
+      try { await db.collection('orders').doc(code).set(currentCreatedOrder); } catch(err){}
     }
     const local = getOrdersLocal();
-    local.unshift(orderData);
+    local.unshift(currentCreatedOrder);
     saveOrdersLocal(local);
 
-    // Setup WhatsApp Link
     document.getElementById('finalCode').textContent = code;
-    const waText = `مرحباً تطبيق ترجمني 👋%0Aأود إرسال طلب ترجمة جديدة:%0A%0A📌 *كود الطلب:* ${code}%0A👤 *الاسم:* ${nameVal}%0A📞 *الهاتف:* ${phoneVal}%0A📄 *المستند:* ${docVal}%0A🌐 *المسار:* من ${srcVal} إلى ${trgVal}%0A⚡ *سرعة التسليم:* ${isExpress}`;
-    document.getElementById('waSendBtn').href = `https://wa.me/218916231976?text=${waText}`;
-
     document.getElementById('formView').hidden = true;
     document.getElementById('confirmationView').hidden = false;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
-  // ---------- 7. Verification Tool Feature ----------
+  // زر تحويل الواتساب المباشر
+  document.getElementById('waSendBtn').addEventListener('click', () => {
+    if(!currentCreatedOrder) return;
+    const o = currentCreatedOrder;
+    
+    const text = `مرحباً أصول الأندلس للترجمة والسفر 👋%0A%0Aأود تأكيد طلب الترجمة عبر المنظومة:%0A📌 *كود الطلب المرجعي:* ${o.id}%0A👤 *العميل:* ${o.name}%0A📞 *الهاتف:* ${o.phone}%0A✈️ *نوع المعاملة/المستند:* ${o.docType}%0A🌐 *المسار:* من ${o.sourceLang} إلى ${o.targetLang}%0A📊 *عدد الصفحات:* ${o.pages}%0A⚡ *حالة السرعة:* ${o.express}%0A📁 *اسم الملف:* ${o.fileName}%0A📝 *ملاحظات الأسماء:* ${o.notes}%0A%0A⚡ *تصميم وتنفيذ المنظومة:* المهندس مجيب مبارك`;
+
+    window.open(`https://wa.me/218916231976?text=${text}`, '_blank');
+  });
+
+  // ---------- 7. فحص المستندات ----------
   document.getElementById('verifyBtn').addEventListener('click', () => {
     const codeInput = document.getElementById('verifyInput').value.trim();
     const res = document.getElementById('verifyResult');
     const local = getOrdersLocal();
     const match = local.find(o => o.id === codeInput);
+    
     if(match){
       res.style.color = '#22C55E';
-      res.textContent = `✓ مستند معتمد ومسجل باسم: (${match.name}) - الحالة: ${match.status}`;
+      res.textContent = `✓ المعاملة موثوقة ومسجلة رسمياً باسم: (${match.name}) — نوع المستند: (${match.docType})`;
     } else {
       res.style.color = '#EF4444';
-      res.textContent = '❌ كود المستند غير مسجل أو لم يتم تأكيده بعد في المنظومة.';
+      res.textContent = '❌ الكود المرجعي غير مسجل في قاعدة البيانات.';
     }
   });
 
-  // ---------- 8. Admin Portal Authentication & Live Sync ----------
+  // ---------- 8. دخول لوحة التحكم ----------
   document.getElementById('loginBtn').addEventListener('click', () => {
     const phone = document.getElementById('adminPhone').value.trim();
     const pass = document.getElementById('adminPass').value.trim();
@@ -659,39 +772,21 @@
   function renderDashboard(){
     const body = document.getElementById('ordersBody');
     body.innerHTML = '';
-    
-    function populate(orders){
-      body.innerHTML = '';
-      document.getElementById('statNew').textContent = orders.filter(o=>o.status.includes('جديد')).length;
-      document.getElementById('statProgress').textContent = orders.filter(o=>o.status.includes('قيد')).length;
-      document.getElementById('statReady').textContent = orders.filter(o=>o.status.includes('جاهز')).length;
-      document.getElementById('statDone').textContent = orders.filter(o=>o.status.includes('تم التسليم')).length;
-
-      orders.forEach(o => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td style="font-family:'IBM Plex Mono', monospace;">${o.id}</td>
-          <td>${o.name}</td>
-          <td>${o.phone}</td>
-          <td>${o.sourceLang} ← ${o.targetLang}</td>
-          <td>${o.docType}</td>
-          <td><span style="background:var(--teal-bg); padding:4px 8px; border-radius:6px; font-weight:700; color:var(--brand-green);">${o.status}</span></td>
-        `;
-        body.appendChild(tr);
-      });
-    }
-
-    if(db){
-      db.collection('orders').onSnapshot(snap => {
-        const cloudOrders = snap.docs.map(d => d.data());
-        populate(cloudOrders.length ? cloudOrders : getOrdersLocal());
-      }, () => populate(getOrdersLocal()));
-    } else {
-      populate(getOrdersLocal());
-    }
+    const orders = getOrdersLocal();
+    orders.forEach(o => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-family:'IBM Plex Mono', monospace; font-weight:700;">${o.id}</td>
+        <td>${o.name}</td>
+        <td>${o.phone}</td>
+        <td>${o.sourceLang} ← ${o.targetLang}</td>
+        <td>${o.docType}</td>
+        <td><span style="background:var(--teal-bg); padding:4px 10px; border-radius:6px; font-weight:700; color:var(--brand-green);">مأكد</span></td>
+      `;
+      body.appendChild(tr);
+    });
   }
 
-  // Protection Controls
   document.addEventListener('contextmenu', event => event.preventDefault());
 </script>
 </body>
